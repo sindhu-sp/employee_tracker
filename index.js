@@ -1,13 +1,16 @@
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const inquirer = require("inquirer");
 
-const connection = mysql.createConnection({
+//Connect to database
+const db = mysql.createConnection({
     host: 'localhost',
     port: 3301,
     user: 'root',
     password: 'password',
     database: 'employee_db'
-});
+},
+console.log('Connected to the employee_db database')
+);
 
 // class Database {
 //     constructor( config ) {
