@@ -12,6 +12,11 @@ const db = mysql.createConnection({
 console.log('Connected to the employee_db database')
 );
 
+db.connect(function(err) {
+    if (err) throw err;
+    begin();
+});
+
 // class Database {
 //     constructor( config ) {
 //         this.connection = mysql.createConnection( config );
@@ -49,7 +54,8 @@ function begin() {
             "Add A Department",
             "Add A Role", 
             "Add An Employee", 
-            "Update An Employee Role"
+            "Update An Employee Role",
+            "Exit"
         ]
 
     })
@@ -76,7 +82,23 @@ function begin() {
             case "Update An Employee Role":
                 updateEmployeeRole();
                 break;
+            case "Exit":
+                db.end();
+                break;
 
         }
     });
 };
+
+// View All Employees
+
+function employeesView() {
+    db.query(
+        "SELECT employee.id, employee.first_name, employee.last_name, emp_role.title, department.d_name AS department, emp_role.salary, CONCAT(manager.first_name), '', manager.last_name AS manager FROM employee LEFT JOIN emp_role on employee.role_id = emp_role_id LEFT JOIN department on emp_role.department_id = department.id LEFT JOIN employee manager on manager.manager_id = employee.manager_id;",
+        function(err, res) {
+            if (err) throw err;
+            console.table(res);
+            begin()
+        }
+    )
+}
