@@ -1,10 +1,11 @@
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
+let departments;
 
 //Connect to database
 const db = mysql.createConnection({
         host: 'localhost',
-        port: 3301,
+        port: 3306,
         user: 'root',
         password: 'password',
         database: 'employee_db'
@@ -104,7 +105,7 @@ function departmentView() {
 // View All Roles
 
 function rolesView() {
-    db.query("SELECT * FROM role", function (err, res) {
+    db.query("SELECT * FROM emp_role", function (err, res) {
         if (err) throw err;
         console.table(res);
         begin();
@@ -115,7 +116,8 @@ function rolesView() {
 
 function employeesView() {
     db.query(
-        "SELECT employee.id, employee.first_name, employee.last_name, emp_role.title, department.d_name AS department, emp_role.salary, CONCAT(manager.first_name), '', manager.last_name AS manager FROM employee LEFT JOIN emp_role on employee.role_id = emp_role_id LEFT JOIN department on emp_role.department_id = department.id LEFT JOIN employee manager on manager.manager_id = employee.manager_id;",
+
+        "SELECT id, CONCAT(first_name, ' ', last_name) AS employee_name FROM employee",
         function (err, res) {
             if (err) throw err;
             console.table(res);
@@ -128,67 +130,86 @@ function employeesView() {
 
 function departmentAdd() {
     inquirer.prompt({
-        name: "department",
-        type: "input",
-        message: "Name of the new Department"
-    })
-    .then(function(answer) {
-        console.log(answer.department);
-        db.query("INSERT INTO department SET ?",
-        {
-            name: answer.department,
-        },
-        function (err, res) {
+            name: "department",
+            type: "input",
+            message: "Name of the new Department"
+        })
+        .then(function (answer) {
+            console.log(answer.department);
+            db.query("INSERT INTO department SET ?", {
+                    d_name: answer.department,
+                },
+                function (err, res) {
+                    if (err) throw err;
+                    console.table(res);
+                    begin();
+                });
+        });
+};
+/////
+/////
+//  Add A Role
+
+function roleAdd() {
+    db.query('SELECT * FROM department', function (err, res) {
         if (err) throw err;
-        console.table(res);
-        begin();
+        var question = [{
+                name: "deptName",
+                type: "list",
+                message: "Which department the new role to be added?:  ",
+                choices: function () {
+                    var deptChoice = [];
+                    res.forEach(res => {
+                        deptChoice.push(
+                            res.d_name
+                        );
+                    })
+                    return deptChoice;
+                }
+
+            },
+
+            {
+                name: "title",
+                type: "input",
+                message: "Employee's Role: "
+            },
+
+            {
+                name: "salary",
+                type: "input",
+                message: "Salary of the Role: "
+            }
+        ];
+
+        inquirer.prompt(question).then(function (answer) {
+            const department = answer.deptName;
+
+            db.query('SELECT * FROM department', function (err, res) {
+                if (err) throw err;
+                let dept = res.filter(function (res) {
+                    return res.d_name == department;
+                })
+                let id = dept[0].id;
+                let query = "INSERT INTO emp_role (title, salary, department_id) VALUES (?, ?, ?)";
+                let values = [answer.title, parseInt(answer.salary), id]
+                console.log(values);
+                db.query(query, values);
+                rolesView();
+            })
         });
     });
 };
 
-//  Add A Role
 
-function roleAdd() {
-    var question = [
-        {
-            name: "title",
-            type: "input",
-            message: "Employee's Role: "
-        },
-        {
-            name: "deptId",
-            type: "input",
-            message: "Which department the new role to be added: "
-        },
-        {
-            name: "salary",
-            type: "list",
-            message: "Salary of the Role: "
-        }
-    ];
 
-    inquirer.prompt(question).then(function(answer) {
-        db.query(
-            "INSERT INTO role SET ?", 
-            {
-                title: answer.title,
-                department_id: answer.id,
-                salary: answer.salary
-            },
-            function (err, res) {
-                if (err) throw err;
-                begin();
-            }
-        );
-    });
-};
-
+////////////
+////////////
 // Add An Employee
 
 function employeeAdd() {
 
-    var question = [
-        {
+    var question = [{
             name: "first_name",
             type: "input",
             message: "Employee's First Name: "
@@ -210,10 +231,9 @@ function employeeAdd() {
         }
     ];
 
-    inquirer.prompt(question).then(function(answer) {
+    inquirer.prompt(question).then(function (answer) {
         db.query(
-            "INSERT INTO employee SET ?", 
-            {
+            "INSERT INTO employee SET ?", {
                 first_name: answer.first_name,
                 last_name: answer.last_name,
                 role_id: answer.title,
@@ -226,11 +246,10 @@ function employeeAdd() {
             }
         )
     });
-    
+
 };
 
 // Update An Employee Role
-
 function updateEmployeeRole() {
     var emp = employeesView();
     var empOption = emp.map(index => {
@@ -248,3 +267,40 @@ function updateEmployeeRole() {
 function updateManager() {
     db.query("UPDATE employee SET role_id=? WHERE id=?", [roleID, empID])
 };
+
+// function roleAdd() {
+
+//     var question = [
+//         {
+//             name: "title",
+//             type: "input",
+//             message: "Employee's Role: "
+//         },
+//         {
+//             name: "deptId",
+//             type: "input",
+//             message: "Which department the new role to be added?:  "
+
+//         },
+//         {
+//             name: "salary",
+//             type: "list",
+//             message: "Salary of the Role: "
+//         }
+//     ];
+
+//     inquirer.prompt(question).then(function(answer) {
+//         db.query(
+//             "INSERT INTO emp_role SET ?", 
+//             {
+//                 title: answer.title,
+//                 department_id: answer.deptId,
+//                 salary: answer.salary
+//             },
+//             function (err, res) {
+//                 if (err) throw err;
+//                 begin();
+//             }
+//         );
+//     });
+// };
