@@ -1,5 +1,6 @@
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
+const consoleTable = require('console.table');
 let departments;
 
 //Connect to database
@@ -80,7 +81,7 @@ function departmentView() {
 // View All Roles
 
 function rolesView() {
-    db.query("SELECT * FROM emp_role", function (err, res) {
+    db.query("SELECT emp_role.id, emp_role.title, emp_role.salary, department.d_name FROM emp_role RIGHT JOIN department ON emp_role.department_id=department.id ORDER BY emp_role.id", function (err, res) {
         if (err) throw err;
         console.table(res);
         begin();
@@ -91,7 +92,7 @@ function rolesView() {
 
 function employeesView() {
     db.query(
-        "SELECT id, CONCAT(first_name, ' ', last_name) AS employee_name FROM employee",
+        "SELECT employee.id, employee.first_name, employee.last_name, emp_role.title, emp_role.salary, employee.manager_id, department.d_name FROM employee INNER JOIN emp_role ON employee.role_id=emp_role.id INNER JOIN department ON emp_role.department_id=department.id ORDER BY employee.id",
         function (err, res) {
             if (err) throw err;
             console.table(res);
@@ -117,8 +118,9 @@ function departmentAdd() {
                 },
                 function (err, res) {
                     if (err) throw err;
-                    console.table(res);
-                    begin();
+                    // console.table(res);
+                    // begin();
+                    departmentView();
                 }
             );
         });
@@ -170,6 +172,7 @@ function roleAdd() {
                 console.log(values);
                 db.query(query, values);
                 rolesView();
+                // console.table(res, );
             });
         });
     });
