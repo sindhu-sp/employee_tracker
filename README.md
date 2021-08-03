@@ -56,7 +56,7 @@ so that they can organize and plan my business.
 
 
 ## The recording of the working program
-<img src="./assets/employee_tracker.gif" alt="refresh page" height = 400 width= 400 />
+<img src="./assets/employee_tracker.gif" alt="refresh page" height = 600 width= 600 />
 
 ## Github Repository URL
 https://github.com/sindhu-sp/employee_tracker
