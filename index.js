@@ -92,7 +92,9 @@ function rolesView() {
 
 function employeesView() {
     db.query(
-        "SELECT employee.id, employee.first_name, employee.last_name, emp_role.title, emp_role.salary, employee.manager_id, department.d_name FROM employee INNER JOIN emp_role ON employee.role_id=emp_role.id INNER JOIN department ON emp_role.department_id=department.id ORDER BY employee.id",
+        
+        "SELECT employee.id, employee.first_name, employee.last_name, emp_role.title, department.d_name as department, emp_role.salary,  CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee LEFT JOIN employee manager ON manager.manager_id = employee.manager_id INNER JOIN emp_role ON(emp_role.id=employee.role_id) INNER JOIN department ON (department.id=emp_role.department_id) ORDER BY employee.id",
+        // "SELECT * FROM employee",
         function (err, res) {
             if (err) throw err;
             console.table(res);

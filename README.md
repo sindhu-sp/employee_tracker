@@ -56,7 +56,7 @@ so that they can organize and plan my business.
 
 
 ## The recording of the working program
-
+<img src="./assets/employee_tracker.gif" alt="refresh page" height = 400 width= 400 />
 
 ## Github Repository URL
 https://github.com/sindhu-sp/employee_tracker
@@ -65,7 +65,7 @@ https://github.com/sindhu-sp/employee_tracker
 ## Technologies Used:
 - MySQL
 - Inquirer
-- Node.js
+- Express.js
 
 ## Contributor
 * Sindhu Pillai
